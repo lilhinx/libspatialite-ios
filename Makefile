@@ -143,4 +143,4 @@ ${CURDIR}/libxml2:
 
 
 clean:
-	rm -rf build geos proj spatialite sqlite3 include lib libiconv
+	rm -rf build geos proj spatialite sqlite3 include lib libiconv libxml2
