@@ -26,12 +26,16 @@ lib/libspatialite.a: build_arches
 		; \
 		done;
 
+
+
 # Build separate architectures
 build_arches:
-	${MAKE} arch ARCH=armv7 IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin
-	${MAKE} arch ARCH=armv7s IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin
+	${MAKE} arch ARCH=armv7 IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin 
+	${MAKE} arch ARCH=armv7s IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin 
 	${MAKE} arch ARCH=i386 IOS_PLATFORM=iPhoneSimulator HOST=i386-apple-darwin
 
+
+ROOTDIR = ${CURDIR}
 PREFIX = ${CURDIR}/build/${ARCH}
 LIBDIR = ${PREFIX}/lib
 BINDIR = ${PREFIX}/bin
@@ -39,13 +43,13 @@ INCLUDEDIR = ${PREFIX}/include
 
 CXX = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 CC = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
-CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=5.0
-CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -miphoneos-version-min=5.0
+CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -I${ROOTDIR} -miphoneos-version-min=5.0
+CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -I${ROOTDIR} -miphoneos-version-min=5.0
 LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=5.0
 
 arch: ${LIBDIR}/libspatialite.a
 
-${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/libsqlite3.a ${CURDIR}/spatialite
+${LIBDIR}/libspatialite.a: ${LIBDIR}/libxml2.a ${LIBDIR}/libiconv.a ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/libsqlite3.a ${CURDIR}/spatialite
 	cd spatialite && env \
 	CXX=${CXX} \
 	CC=${CC} \
@@ -54,7 +58,7 @@ ${LIBDIR}/libspatialite.a: ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/lib
 	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" ./configure --host=${HOST} --disable-freexl --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
 
 ${CURDIR}/spatialite:
-	curl http://www.gaia-gis.it/gaia-sins/libspatialite-4.1.1.tar.gz > spatialite.tar.gz
+	curl http://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-4.1.1.tar.gz > spatialite.tar.gz
 	tar -xzf spatialite.tar.gz
 	rm spatialite.tar.gz
 	mv libspatialite-4.1.1 spatialite
@@ -66,7 +70,7 @@ ${LIBDIR}/libproj.a: ${CURDIR}/proj
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="-${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
+	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} && make clean install
 
 ${CURDIR}/proj:
 	curl http://download.osgeo.org/proj/proj-4.8.0.tar.gz > proj.tar.gz
@@ -104,5 +108,38 @@ ${CURDIR}/sqlite3:
 	mv sqlite-autoconf-3080100 sqlite3
 	touch sqlite3
 
+${LIBDIR}/libiconv.a: ${CURDIR}/iconv
+	cd libiconv && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
+	CXX=${CXX} \
+	CC=${CC} \
+	CFLAGS="${CFLAGS}" \
+	CXXFLAGS="${CXXFLAGS}" \
+	LDFLAGS="${LDFLAGS}" \
+	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared --enable-static && make clean install
+
+${CURDIR}/iconv:
+	curl http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz > libiconv.tar.gz
+	tar xzvf libiconv.tar.gz
+	rm libiconv.tar.gz
+	rm -rf libiconv
+	mv libiconv-1.14 libiconv
+
+
+${LIBDIR}/libxml2.a: ${CURDIR}/libxml2
+	cd libxml2 && env LIBTOOL=${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool \
+	CXX=${CXX} \
+	CC=${CC} \
+	CFLAGS="${CFLAGS}" \
+	CXXFLAGS="${CXXFLAGS}" \
+	LDFLAGS="${LDFLAGS}" \
+	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared --enable-static && make clean install
+
+${CURDIR}/libxml2:
+	curl ftp://xmlsoft.org/libxml2/libxml2-2.9.1.tar.gz > libxml.tar.gz 
+	tar xzvf libxml.tar.gz
+	rm libxml.tar.gz
+	mv libxml2-2.9.1 libxml2
+
+
 clean:
-	rm -rf build geos proj spatialite sqlite3 include lib
+	rm -rf build geos proj spatialite sqlite3 include lib libiconv
