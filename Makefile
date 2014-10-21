@@ -70,7 +70,8 @@ ${LIBDIR}/libproj.a: ${CURDIR}/proj
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="-${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} && make clean install
+	LDFLAGS="${LDFLAGS}" ./configure --host=${HOST} --prefix=${PREFIX} --disable-shared && make clean install
+
 
 ${CURDIR}/proj:
 	curl http://download.osgeo.org/proj/proj-4.8.0.tar.gz > proj.tar.gz
