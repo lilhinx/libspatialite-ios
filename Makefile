@@ -49,7 +49,7 @@ LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -
 
 arch: ${LIBDIR}/libspatialite.a
 
-${LIBDIR}/libspatialite.a: ${LIBDIR}/libxml2.a ${LIBDIR}/libiconv.a ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/libsqlite3.a ${CURDIR}/spatialite
+${LIBDIR}/libspatialite.a: ${LIBDIR}/libiconv.a ${LIBDIR}/libxml2.a ${LIBDIR}/libproj.a ${LIBDIR}/libgeos.a ${LIBDIR}/libsqlite3.a ${CURDIR}/spatialite
 	cd spatialite && env \
 	CXX=${CXX} \
 	CC=${CC} \
@@ -132,7 +132,7 @@ ${LIBDIR}/libxml2.a: ${CURDIR}/libxml2
 	CC=${CC} \
 	CFLAGS="${CFLAGS}" \
 	CXXFLAGS="${CXXFLAGS}" \
-	LDFLAGS="${LDFLAGS}" \
+	LDFLAGS="-liconv ${LDFLAGS}" \
 	./configure --host=${HOST} --prefix=${PREFIX} --disable-shared --enable-static && make clean install
 
 ${CURDIR}/libxml2:
