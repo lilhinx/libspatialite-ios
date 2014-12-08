@@ -19,8 +19,10 @@ lib/libspatialite.a: build_arches
 	for file in build/armv7/lib/*.a; \
 		do name=`basename $$file .a`; \
 		${IOS_PLATFORM_DEVELOPER}/usr/bin/lipo -create \
+			-arch arm64 build/arm64/lib/$$name.a \
 			-arch armv7 build/armv7/lib/$$name.a \
 			-arch armv7s build/armv7s/lib/$$name.a \
+			-arch x86_64 build/x86_64/lib/$$name.a \
 			-arch i386 build/i386/lib/$$name.a \
 			-output lib/$$name.a \
 		; \
@@ -30,6 +32,8 @@ lib/libspatialite.a: build_arches
 
 # Build separate architectures
 build_arches:
+	${MAKE} arch ARCH=arm64 IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin 
+	${MAKE} arch ARCH=x86_64 IOS_PLATFORM=iPhoneOS HOST=x86_64-apple-darwin 
 	${MAKE} arch ARCH=armv7 IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin 
 	${MAKE} arch ARCH=armv7s IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin 
 	${MAKE} arch ARCH=i386 IOS_PLATFORM=iPhoneSimulator HOST=i386-apple-darwin
@@ -43,9 +47,9 @@ INCLUDEDIR = ${PREFIX}/include
 
 CXX = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 CC = ${XCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
-CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -I${ROOTDIR} -miphoneos-version-min=7.0
-CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -I${ROOTDIR} -miphoneos-version-min=7.0
-LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=7.0
+CFLAGS = -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -I${ROOTDIR} -miphoneos-version-min=8.0
+CXXFLAGS = -stdlib=libc++ -std=c++11 -isysroot ${IOS_SDK} -I${IOS_SDK}/usr/include -arch ${ARCH} -I${INCLUDEDIR} -I${ROOTDIR} -miphoneos-version-min=8.0
+LDFLAGS = -stdlib=libc++ -isysroot ${IOS_SDK} -L${LIBDIR} -L${IOS_SDK}/usr/lib -arch ${ARCH} -miphoneos-version-min=8.0
 
 arch: ${LIBDIR}/libspatialite.a
 
@@ -58,11 +62,10 @@ ${LIBDIR}/libspatialite.a: ${LIBDIR}/libiconv.a ${LIBDIR}/libxml2.a ${LIBDIR}/li
 	LDFLAGS="${LDFLAGS} -liconv -lgeos -lgeos_c -lc++" ./configure --host=${HOST} --disable-freexl --prefix=${PREFIX} --with-geosconfig=${BINDIR}/geos-config --disable-shared && make clean install-strip
 
 ${CURDIR}/spatialite:
-	curl http://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-4.1.1.tar.gz > spatialite.tar.gz
+	curl http://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-4.2.0.tar.gz > spatialite.tar.gz
 	tar -xzf spatialite.tar.gz
 	rm spatialite.tar.gz
-	mv libspatialite-4.1.1 spatialite
-	patch -Np0 < spatialite.patch
+	mv libspatialite-4.2.0 spatialite
 
 ${LIBDIR}/libproj.a: ${CURDIR}/proj
 	cd proj && env \
