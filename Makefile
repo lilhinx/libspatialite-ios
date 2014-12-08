@@ -33,7 +33,7 @@ lib/libspatialite.a: build_arches
 # Build separate architectures
 build_arches:
 	${MAKE} arch ARCH=arm64 IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin 
-	${MAKE} arch ARCH=x86_64 IOS_PLATFORM=iPhoneOS HOST=x86_64-apple-darwin 
+	${MAKE} arch ARCH=x86_64 IOS_PLATFORM=iPhoneSimulator HOST=x86_64-apple-darwin 
 	${MAKE} arch ARCH=armv7 IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin 
 	${MAKE} arch ARCH=armv7s IOS_PLATFORM=iPhoneOS HOST=arm-apple-darwin 
 	${MAKE} arch ARCH=i386 IOS_PLATFORM=iPhoneSimulator HOST=i386-apple-darwin
